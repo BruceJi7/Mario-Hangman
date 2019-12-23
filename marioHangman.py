@@ -1,8 +1,11 @@
 import random, openpyxl, os, pygame, sys
 from pygame.locals import *
 import marioAssets
+from string import ascii_lowercase
 
 # wordsToPlayWith = ['horse', 'tractor', 'goat', 'chicken', 'tuesday' ]
+alphabet = [letter for letter in ascii_lowercase]
+print(alphabet)
 
 
 
@@ -133,7 +136,7 @@ def hangmanRound(initObjects):
 
     progress = produceProgessWord(sessionWord)
 
-
+    key = None
     while True:
         checkForQuit()
 
@@ -152,7 +155,7 @@ def hangmanRound(initObjects):
         
         qBox = marioAssets.boxImg
         qBoxRect = qBox.get_rect()
-        qBoxRect.centery = WINDOWHEIGHT/2
+        qBoxRect.centery = WINDOWHEIGHT/4
         startingX = WINDOWWIDTH/4
         boxSpacing = 56
         charCount = 0
@@ -162,8 +165,22 @@ def hangmanRound(initObjects):
             if char == '?':
                 qBoxRect.centerx = startingX + (boxSpacing*charCount)
                 DISPLAYSURF.blit(qBox, qBoxRect)
+        
+        
+        for event in pygame.event.get(KEYUP):
+            if event.key == K_ESCAPE:
+                terminate()
+            else:
+                key = event.key
 
+        if key:
+            if key > 96 and key < 123:
+                key -=97
+                print(alphabet[key])
 
+        
+
+        
         
         
         
