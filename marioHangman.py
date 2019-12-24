@@ -5,9 +5,6 @@ from string import ascii_lowercase
 
 # wordsToPlayWith = ['horse', 'tractor', 'goat', 'chicken', 'tuesday' ]
 alphabet = [letter for letter in ascii_lowercase]
-print(alphabet)
-
-
 
 
 def printWord(word):
@@ -140,10 +137,21 @@ def hangmanRound(initObjects):
     while True:
         checkForQuit()
 
+        
+        #Event-related variables:
         newW, newH = None, None
+        key = None
 
-        for event in pygame.event.get(VIDEORESIZE):
-            newW, newH = event.size
+        #Event-reading loop:
+        for event in pygame.event.get():
+            if event.type == VIDEORESIZE:
+                newW, newH = event.size
+            elif event.type == KEYUP:
+                if event.key == K_ESCAPE:
+                    terminate()
+                else:
+                    key = event.key
+
         
         if newW and newH:
             screen = pygame.display.set_mode((newW, newH ), pygame.RESIZABLE, display=0)
@@ -167,12 +175,11 @@ def hangmanRound(initObjects):
                 DISPLAYSURF.blit(qBox, qBoxRect)
         
         
-        for event in pygame.event.get(KEYUP):
-            if event.key == K_ESCAPE:
-                terminate()
-            else:
-                key = event.key
 
+
+        
+           
+        #Testing the key/alphabet fetch
         if key:
             if key > 96 and key < 123:
                 key -=97
