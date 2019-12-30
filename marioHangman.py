@@ -173,12 +173,35 @@ def hangmanRound(initObjects):
             if char == '?':
                 qBoxRect.centerx = startingX + (boxSpacing*charCount)
                 DISPLAYSURF.blit(qBox, qBoxRect)
-        
-        
+            else:
+                boxSurf = marioAssets.alphaBoxDict[char]
+                boxRect = boxSurf.get_rect()
+                boxRect.centery = WINDOWHEIGHT/4
+                boxRect.centerx = startingX + (boxSpacing*charCount)
+                DISPLAYSURF.blit(boxSurf, boxRect)               
+
+        alphaMenuTopY = (WINDOWHEIGHT/4) * 3
+        alphaMenuBottomY = alphaMenuTopY + boxSpacing
+        alphaMenuXIndent = WINDOWWIDTH/7
+        for number, letter in enumerate(marioAssets.alphaBoxDict.keys()):
+            boxXCount = number+1
+            alphaBoxSurf = marioAssets.alphaBoxDict[letter] 
+            alphaBoxRect = alphaBoxSurf.get_rect()
+            if number > 12:
+                boxXCount -= 13
+                alphaBoxRect.centery = alphaMenuBottomY
+            else:
+                alphaBoxRect.centery = alphaMenuTopY
+            alphaBoxRect.centerx = alphaMenuXIndent + (boxSpacing * boxXCount)
+            # if letter in previousGuesses:
+            #     continue
+            # else:
+            DISPLAYSURF.blit(alphaBoxSurf, alphaBoxRect)
 
 
-        
-           
+
+
+
         #Testing the key/alphabet fetch
         if key:
             if key > 96 and key < 123:
