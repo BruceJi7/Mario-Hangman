@@ -32,12 +32,12 @@ def checkAndReveal(guess, progressWord, wordToGuess):
 
     print(' '.join(progressWord))
 
-    if '_' in progressWord:
-        continueGame = True
+    if '?' in progressWord:
+        hasWon = False
     else:
-        continueGame = False
+        hasWon = True
     
-    return continueGame, progressWord
+    return hasWon, progressWord
 
 def getGuess(previousGuesses):
     
@@ -123,7 +123,7 @@ BKGCOLOR = WHITE
 MAINTEXTCOLOR = BLACK
 
 
-def hangmanRound(initObjects):
+def hangmanRound(initObjects, difficulty=12):
     screen = initObjects[0]
     FPSCLOCK = initObjects[1]
     DISPLAYSURF = initObjects[2]
@@ -132,6 +132,9 @@ def hangmanRound(initObjects):
     sessionWord = random.choice(wordsToPlayWith)
 
     progress = produceProgessWord(sessionWord)
+    guessedLetters = []
+    wonTheGame = False
+    
 
     key = None
     while True:
@@ -140,7 +143,7 @@ def hangmanRound(initObjects):
         
         #Event-related variables:
         newW, newH = None, None
-        key = None
+        submitLetter = False
 
         #Event-reading loop:
         for event in pygame.event.get():
@@ -149,6 +152,8 @@ def hangmanRound(initObjects):
             elif event.type == KEYUP:
                 if event.key == K_ESCAPE:
                     terminate()
+                elif event.key in (K_RETURN, K_KP_ENTER):
+                    submitLetter = True
                 else:
                     key = event.key
 
@@ -161,6 +166,7 @@ def hangmanRound(initObjects):
         DISPLAYSURF.blit(marioAssets.bkImage, (0, 0))
 
         
+        # Drawing the ??? filled secret word
         qBox = marioAssets.boxImg
         qBoxRect = qBox.get_rect()
         qBoxRect.centery = WINDOWHEIGHT/4
@@ -180,8 +186,9 @@ def hangmanRound(initObjects):
                 boxRect.centerx = startingX + (boxSpacing*charCount)
                 DISPLAYSURF.blit(boxSurf, boxRect)               
 
-        alphaMenuTopY = (WINDOWHEIGHT/4) * 3
-        alphaMenuBottomY = alphaMenuTopY + boxSpacing
+        # Drawing the remaining alphabet boxes
+        alphaMenuTopY = (WINDOWHEIGHT/4) * 2.6
+        alphaMenuBottomY = alphaMenuTopY + boxSpacing*2
         alphaMenuXIndent = WINDOWWIDTH/7
         for number, letter in enumerate(marioAssets.alphaBoxDict.keys()):
             boxXCount = number+1
@@ -193,22 +200,27 @@ def hangmanRound(initObjects):
             else:
                 alphaBoxRect.centery = alphaMenuTopY
             alphaBoxRect.centerx = alphaMenuXIndent + (boxSpacing * boxXCount)
-            # if letter in previousGuesses:
-            #     continue
-            # else:
-            DISPLAYSURF.blit(alphaBoxSurf, alphaBoxRect)
+            if letter in guessedLetters:
+                continue
+            else:
+                DISPLAYSURF.blit(alphaBoxSurf, alphaBoxRect)
 
 
 
-
-
-        #Testing the key/alphabet fetch
-        if key:
+        #Submit chosen letter, and add to guessed letters
+        if key and submitLetter:
             if key > 96 and key < 123:
-                key -=97
-                print(alphabet[key])
-
-        
+                letterChosen = key - 97
+                guessedLetters.append(alphabet[letterChosen])
+                print(alphabet[letterChosen])
+                wonTheGame, progress = checkAndReveal(alphabet[letterChosen], progress, sessionWord)
+                key = None
+        if len(guessedLetters) >= difficulty:
+            print('You lose')
+            return 'LOSE'
+        if wonTheGame:
+            print('Winner Winner, Chicken Dinner')
+            return 'WIN'
 
         
         
@@ -253,8 +265,9 @@ def main():
     DISPLAYRECT.center = (BKGWIDTH/2, BKGHEIGHT/2)
     
     initObjects = [screen, FPSCLOCK, DISPLAYSURF, DISPLAYRECT]
+    while True:
+        roundResult = hangmanRound(initObjects)
 
-    hangmanRound(initObjects)
 
 
     

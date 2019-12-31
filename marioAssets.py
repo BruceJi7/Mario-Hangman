@@ -20,5 +20,7 @@ for letter in range(len(alphaBoxImgs)):
     valueImage = alphaBoxImgs[letter]
     alphaBoxDict[keyLetter] = valueImage
 
+blankBox = pygame.image.load(os.path.join(alphaboxPath, 'blank.PNG'))
+
 
 
