@@ -36,8 +36,10 @@ def checkAndReveal(guess, progressWord, wordToGuess):
         hasWon = False
     else:
         hasWon = True
-    
     return hasWon, progressWord
+
+def calculateScore(previousGuesses, progressWord):
+    return len([letter for letter in previousGuesses if letter not in progressWord])
 
 def getGuess(previousGuesses):
     
@@ -53,7 +55,7 @@ def getGuess(previousGuesses):
         
 
 
-def excelGetGameScheme(book, unit):
+def excelGetGameScheme(book, units):
     path = r'C:\Come On Python Games\resources\marioHangman\quiz'
     bookPath = f'{book}.xlsx'
     excelPath = os.path.join(path, bookPath)
@@ -61,19 +63,20 @@ def excelGetGameScheme(book, unit):
     
 
     wb = openpyxl.load_workbook(excelPath)
-    sheet = wb[unit]
     
-
     wordsLoadedFromExcel = []
-    row = 1
-    endOfWords = False
-    while not endOfWords:
-        cellContents = sheet.cell(row=row, column=1).value
-        if not cellContents:
-            endOfWords = True
-        else:
-            wordsLoadedFromExcel.append(cellContents)
-            row += 1
+    for unit in units:
+    
+        sheet = wb[unit]
+        row = 1
+        endOfWords = False
+        while not endOfWords:
+            cellContents = sheet.cell(row=row, column=1).value
+            if not cellContents:
+                endOfWords = True
+            else:
+                wordsLoadedFromExcel.append(cellContents)
+                row += 1
     return wordsLoadedFromExcel
 
     
@@ -100,7 +103,7 @@ def hangmanGame(howManyChances):
         
 
 book = 'EB2'
-unit = 'U1'
+unit = ['U1', 'U2', 'U3']
 
 # TODO
 # There should be a menu for books,
@@ -134,6 +137,7 @@ def hangmanRound(initObjects, difficulty=12):
     progress = produceProgessWord(sessionWord)
     guessedLetters = []
     wonTheGame = False
+    currentScore = 0
     
 
     key = None
@@ -205,17 +209,32 @@ def hangmanRound(initObjects, difficulty=12):
             else:
                 DISPLAYSURF.blit(alphaBoxSurf, alphaBoxRect)
 
+        # Drawing Mario
+        marioX = 72
+        marioY = 418
+        mario = marioAssets.Mario
+        marioSurf = mario.surface
+        marioRect = mario.rect
+        marioRect.bottomleft = ((marioX, marioY))
+        DISPLAYSURF.blit(marioSurf, marioRect)
 
 
         #Submit chosen letter, and add to guessed letters
         if key and submitLetter:
             if key > 96 and key < 123:
-                letterChosen = key - 97
-                guessedLetters.append(alphabet[letterChosen])
-                print(alphabet[letterChosen])
-                wonTheGame, progress = checkAndReveal(alphabet[letterChosen], progress, sessionWord)
+                letterIndex = key - 97
+                letterChosen = alphabet[letterIndex]
+                if letterChosen not in guessedLetters:
+                    guessedLetters.append(letterChosen)
+                    print(letterChosen)
+                    wonTheGame, progress = checkAndReveal(letterChosen, progress, sessionWord)
+                    currentScore = calculateScore(guessedLetters, progress)
+                    print(currentScore)
+                else:
+                    print('Already tried that letter')
                 key = None
-        if len(guessedLetters) >= difficulty:
+        
+        if currentScore >= difficulty:
             print('You lose')
             return 'LOSE'
         if wonTheGame:
