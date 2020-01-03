@@ -32,13 +32,17 @@ marioPaths = {
                 'LEFT' : pygame.image.load(os.path.join(marioCharacterPath, 'marioStandingLeft.png')),
                 }
 }
+
 class marioCharacter():
     def __init__(self):
         self.path = marioPaths
+        self.w = 56
+        self.h = 108
         self.__state = 'standing'
         self.__direction = 'RIGHT'
         self.__surface = None
         self.rect = self.makeRect()
+        
     
     @property
     def state(self):
@@ -53,16 +57,15 @@ class marioCharacter():
         return self.__direction
 
     @direction.setter
-    def directon(self, setDirection):
+    def direction(self, setDirection):
         self.__direction = setDirection
 
     @property
     def surface(self):
-        w, h = 56, 108
-        self.__surface = pygame.Surface((w, h), pygame.SRCALPHA)
+        self.__surface = pygame.Surface((self.w, self.h), pygame.SRCALPHA)
         image = self.path[self.state][self.direction]
         imgRect = image.get_rect()
-        imgRect.center = (w/2, h/2)
+        imgRect.center = (self.w/2, self.h/2)
         self.__surface.blit(image, imgRect)
         return self.__surface
     
@@ -70,3 +73,21 @@ class marioCharacter():
         return self.surface.get_rect()
 
 Mario = marioCharacter()
+
+goombaCharacterPath = os.path.join(characterPath, 'goomba')
+goombaPaths = {
+    'walking': {
+                'RIGHT': pygame.image.load(os.path.join(goombaCharacterPath, 'goombaWalkingRight.png')),
+                'LEFT' : pygame.image.load(os.path.join(goombaCharacterPath, 'goombaWalkingLeft.png')),
+                }
+}
+
+class enemyCharacter(marioCharacter):
+    def __init__(self, path):
+        super().__init__()
+        self.path = path
+        self.state = 'walking'
+        self.w = 64
+        self.h = 64
+
+Goomba = enemyCharacter(goombaPaths)

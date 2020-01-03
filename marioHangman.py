@@ -191,8 +191,8 @@ def hangmanRound(initObjects, difficulty=12):
                 DISPLAYSURF.blit(boxSurf, boxRect)               
 
         # Drawing the remaining alphabet boxes
-        alphaMenuTopY = (WINDOWHEIGHT/4) * 2.6
-        alphaMenuBottomY = alphaMenuTopY + boxSpacing*2
+        alphaMenuTopY = (WINDOWHEIGHT/4) * 3
+        alphaMenuBottomY = alphaMenuTopY + boxSpacing
         alphaMenuXIndent = WINDOWWIDTH/7
         for number, letter in enumerate(marioAssets.alphaBoxDict.keys()):
             boxXCount = number+1
@@ -217,6 +217,21 @@ def hangmanRound(initObjects, difficulty=12):
         marioRect = mario.rect
         marioRect.bottomleft = ((marioX, marioY))
         DISPLAYSURF.blit(marioSurf, marioRect)
+
+        # Drawing the enemy
+        enemyX = marioX + (64 * (difficulty - currentScore)) # Calculate from Mario's position
+        enemyY = 418 + 42
+        enemy = marioAssets.Goomba
+        if currentScore % 2:
+            enemy.direction = 'LEFT'
+        else:
+            enemy.direction = 'RIGHT'
+        enemySurf = enemy.surface
+        enemyRect = enemy.rect
+        enemyRect.bottomleft = ((enemyX, enemyY))
+        DISPLAYSURF.blit(enemySurf, enemyRect)
+
+
 
 
         #Submit chosen letter, and add to guessed letters
@@ -286,6 +301,7 @@ def main():
     initObjects = [screen, FPSCLOCK, DISPLAYSURF, DISPLAYRECT]
     while True:
         roundResult = hangmanRound(initObjects)
+
 
 
 
