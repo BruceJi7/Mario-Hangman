@@ -30,13 +30,17 @@ marioPaths = {
     'standing': {
                 'RIGHT': pygame.image.load(os.path.join(marioCharacterPath, 'marioStandingRight.png')),
                 'LEFT' : pygame.image.load(os.path.join(marioCharacterPath, 'marioStandingLeft.png')),
+                },
+    'win':      {
+                'RIGHT': pygame.image.load(os.path.join(marioCharacterPath, 'marioWin.png')),
+                'LEFT': pygame.image.load(os.path.join(marioCharacterPath, 'marioWin.png'))
                 }
 }
 
 class marioCharacter():
     def __init__(self):
         self.path = marioPaths
-        self.w = 56
+        self.w = 68
         self.h = 108
         self.__state = 'standing'
         self.__direction = 'RIGHT'
@@ -91,3 +95,15 @@ class enemyCharacter(marioCharacter):
         self.h = 64
 
 Goomba = enemyCharacter(goombaPaths)
+
+
+musicPath = r'C:\Come On Python Games\resources\marioHangman\music'
+
+music = [
+    os.path.join(musicPath, 'fortress.ogg'),
+    os.path.join(musicPath, 'over1.ogg'),
+    os.path.join(musicPath, 'over2.ogg'),
+    os.path.join(musicPath, 'under')
+]
+loseSound = os.path.join(musicPath, 'fail.ogg')
+winSound = os.path.join(musicPath, 'success.ogg')

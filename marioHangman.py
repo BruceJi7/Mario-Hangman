@@ -125,6 +125,14 @@ WHITE           =(255, 255, 255)
 BKGCOLOR = WHITE
 MAINTEXTCOLOR = BLACK
 
+def beginMusic():
+    pygame.mixer.init()
+    musicTrack = random.choice(marioAssets.music)
+    pygame.mixer.music.load(musicTrack)
+    pygame.mixer.music.set_volume(0.2)
+    pygame.mixer.music.play()
+    pygame.mixer.music.set_endevent(pygame.USEREVENT)
+
 
 def hangmanRound(initObjects, difficulty=12):
     screen = initObjects[0]
@@ -138,6 +146,11 @@ def hangmanRound(initObjects, difficulty=12):
     guessedLetters = []
     wonTheGame = False
     currentScore = 0
+    
+    mario = marioAssets.Mario
+    mario.state = 'standing'
+
+    beginMusic()
     
 
     key = None
@@ -153,6 +166,8 @@ def hangmanRound(initObjects, difficulty=12):
         for event in pygame.event.get():
             if event.type == VIDEORESIZE:
                 newW, newH = event.size
+            elif event.type == USEREVENT:
+                beginMusic()
             elif event.type == KEYUP:
                 if event.key == K_ESCAPE:
                     terminate()
@@ -212,7 +227,6 @@ def hangmanRound(initObjects, difficulty=12):
         # Drawing Mario
         marioX = 72
         marioY = 418
-        mario = marioAssets.Mario
         marioSurf = mario.surface
         marioRect = mario.rect
         marioRect.bottomleft = ((marioX, marioY))
@@ -251,10 +265,10 @@ def hangmanRound(initObjects, difficulty=12):
         
         if currentScore >= difficulty:
             print('You lose')
-            return 'LOSE'
+            return 'LOSE', sessionWord, progress
         if wonTheGame:
             print('Winner Winner, Chicken Dinner')
-            return 'WIN'
+            return 'WIN', sessionWord, progress
 
         
         
@@ -266,10 +280,160 @@ def hangmanRound(initObjects, difficulty=12):
         pygame.display.flip()
         FPSCLOCK.tick(FPS)
         
+def winScreen(initObjects, word):
+    screen = initObjects[0]
+    FPSCLOCK = initObjects[1]
+    DISPLAYSURF = initObjects[2]
+    DISPLAYRECT = initObjects[3]
+
+    musicTrack = marioAssets.winSound
+    pygame.mixer.music.load(musicTrack)
+    pygame.mixer.music.set_volume(0.2)
+    pygame.mixer.music.play()
+
+    while True:
+        checkForQuit()
+
+        
+        #Event-related variables:
+        newW, newH = None, None
+        submitLetter = False
+
+        #Event-reading loop:
+        for event in pygame.event.get():
+            if event.type == VIDEORESIZE:
+                newW, newH = event.size
+            elif event.type == KEYUP:
+                if event.key == K_ESCAPE:
+                    terminate()
+                elif event.key in (K_RETURN, K_KP_ENTER):
+                    submitLetter = True
+
+
+        
+        if newW and newH:
+            screen = pygame.display.set_mode((newW, newH ), pygame.RESIZABLE, display=0)
+            DISPLAYRECT.center = (newW/2, newH/2)
+
+        if submitLetter:
+            return
+        
+        screen.fill(BLACK)
+        DISPLAYSURF.blit(marioAssets.bkImage, (0, 0))
+
+        marioX = 72
+        marioY = 418
+        mario = marioAssets.Mario
+        mario.state = 'win'
+        marioSurf = mario.surface
+        marioRect = mario.rect
+        marioRect.bottomleft = ((marioX, marioY))
+        DISPLAYSURF.blit(marioSurf, marioRect)
+
+        qBox = marioAssets.boxImg
+        qBoxRect = qBox.get_rect()
+        qBoxRect.centery = WINDOWHEIGHT/4
+        startingX = WINDOWWIDTH/4
+        boxSpacing = 56
+        charCount = 0
+
+        for char in word:
+            charCount += 1
+            boxSurf = marioAssets.alphaBoxDict[char]
+            boxRect = boxSurf.get_rect()
+            boxRect.centery = WINDOWHEIGHT/4
+            boxRect.centerx = startingX + (boxSpacing*charCount)
+            DISPLAYSURF.blit(boxSurf, boxRect)  
+
+
+        screen.blit(DISPLAYSURF, DISPLAYRECT)
+        pygame.display.flip()
+        FPSCLOCK.tick(FPS)
+
+def loseScreen(initObjects, word, progress):
+    screen = initObjects[0]
+    FPSCLOCK = initObjects[1]
+    DISPLAYSURF = initObjects[2]
+    DISPLAYRECT = initObjects[3]
+
+    musicTrack = marioAssets.loseSound
+    pygame.mixer.music.load(musicTrack)
+    pygame.mixer.music.set_volume(0.2)
+    pygame.mixer.music.play()
+
+    showWord = False
+    finished = False
 
 
 
+    while True:
+        checkForQuit()
 
+        
+        #Event-related variables:
+        newW, newH = None, None
+        submit = 0
+
+        #Event-reading loop:
+        for event in pygame.event.get():
+            if event.type == VIDEORESIZE:
+                newW, newH = event.size
+            elif event.type == KEYUP:
+                if event.key == K_ESCAPE:
+                    terminate()
+                elif event.key in (K_RETURN, K_KP_ENTER):
+                    if showWord == True:
+                        finished = True
+
+                    if showWord == False:
+                        showWord = True
+                    
+
+        if finished:
+            return
+
+        
+        if newW and newH:
+            screen = pygame.display.set_mode((newW, newH ), pygame.RESIZABLE, display=0)
+            DISPLAYRECT.center = (newW/2, newH/2)
+        
+        screen.fill(BLACK)
+        DISPLAYSURF.blit(marioAssets.bkImage, (0, 0))
+
+        marioX = 72
+        marioY = 418
+        mario = marioAssets.Mario
+        marioSurf = mario.surface
+        marioRect = mario.rect
+        marioRect.bottomleft = ((marioX, marioY))
+        DISPLAYSURF.blit(marioSurf, marioRect)
+
+        qBox = marioAssets.boxImg
+        qBoxRect = qBox.get_rect()
+        qBoxRect.centery = WINDOWHEIGHT/4
+        startingX = WINDOWWIDTH/4
+        boxSpacing = 56
+        charCount = 0
+
+        if showWord:
+            progress = word
+
+        for char in progress:
+            charCount += 1
+            if char == '?':
+                qBoxRect.centerx = startingX + (boxSpacing*charCount)
+                DISPLAYSURF.blit(qBox, qBoxRect)
+            else:
+                boxSurf = marioAssets.alphaBoxDict[char]
+                boxRect = boxSurf.get_rect()
+                boxRect.centery = WINDOWHEIGHT/4
+                boxRect.centerx = startingX + (boxSpacing*charCount)
+                DISPLAYSURF.blit(boxSurf, boxRect) 
+
+
+        screen.blit(DISPLAYSURF, DISPLAYRECT)
+        pygame.display.flip()
+        FPSCLOCK.tick(FPS)
 
 def terminate():
     print('Terminating game...')
@@ -300,7 +464,11 @@ def main():
     
     initObjects = [screen, FPSCLOCK, DISPLAYSURF, DISPLAYRECT]
     while True:
-        roundResult = hangmanRound(initObjects)
+        roundResult, word, progress = hangmanRound(initObjects)
+        if roundResult == 'WIN':
+            winScreen(initObjects, word)
+        elif roundResult == 'LOSE':
+            loseScreen(initObjects, word, progress)
 
 
 
