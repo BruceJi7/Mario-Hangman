@@ -56,33 +56,30 @@ def getGuess(previousGuesses):
 
 
 def excelGetGameScheme(book, units):
-    path = r'C:\Come On Python Games\resources\marioHangman\quiz'
-    bookPath = f'{book}.xlsx'
-    excelPath = os.path.join(path, bookPath)
-
     
-
+    excelPath = r'C:\Come On Python Games\resources\marioHangman\quiz\marioQuiz.xlsx'
+   
     wb = openpyxl.load_workbook(excelPath)
     
     wordsLoadedFromExcel = []
-    for unit in units:
+    unitInts = [int(unit[1:]) for unit in units]
     
-        sheet = wb[unit]
-        row = 1
+    sheet = wb[book]
+    row = 2
+
+    for unit in unitInts:
+    
         endOfWords = False
         while not endOfWords:
-            cellContents = sheet.cell(row=row, column=1).value
+            cellContents = sheet.cell(row=row, column=unit).value
             if not cellContents:
                 endOfWords = True
             else:
-                wordsLoadedFromExcel.append(cellContents)
+                wordsLoadedFromExcel.append(cellContents.lower())
                 row += 1
     return wordsLoadedFromExcel
 
     
-
-
-
 difficulty = 12
 
 def hangmanGame(howManyChances):
@@ -102,7 +99,7 @@ def hangmanGame(howManyChances):
     print('You guessed the word!')
         
 
-book = 'EB4'
+book = 'EB2'
 unit = ['U1', 'U2', 'U3']
 
 # TODO
@@ -146,7 +143,7 @@ def hangmanRound(initObjects, difficulty=12):
     except:
         print('Failed to remove word')
 
-
+    print(sessionWord)
     progress = produceProgessWord(sessionWord)
     guessedLetters = []
     wonTheGame = False
@@ -197,7 +194,7 @@ def hangmanRound(initObjects, difficulty=12):
         qBox = marioAssets.boxImg
         qBoxRect = qBox.get_rect()
         qBoxRect.centery = WINDOWHEIGHT/4
-        startingX = WINDOWWIDTH/4
+        startingX = 200
         boxSpacing = 56
         charCount = 0
 
@@ -343,7 +340,7 @@ def winScreen(initObjects, word, background):
         qBox = marioAssets.boxImg
         qBoxRect = qBox.get_rect()
         qBoxRect.centery = WINDOWHEIGHT/4
-        startingX = WINDOWWIDTH/4
+        startingX = 200
         boxSpacing = 56
         charCount = 0
 
@@ -429,7 +426,7 @@ def loseScreen(initObjects, word, progress, background):
         qBox = marioAssets.boxImg
         qBoxRect = qBox.get_rect()
         qBoxRect.centery = WINDOWHEIGHT/4
-        startingX = WINDOWWIDTH/4
+        startingX = 200
         boxSpacing = 56
         charCount = 0
 
