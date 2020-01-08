@@ -4,6 +4,12 @@ from string import ascii_uppercase, ascii_lowercase
 
 
 backgroundPath = r'C:\Come On Python Games\resources\marioHangman\background\bkg.png'
+bkgPath = r'C:\Come On Python Games\resources\marioHangman\background'
+backgrounds = {
+    'world1' : pygame.image.load(os.path.join(bkgPath, 'bkg.png')),
+    'world2' : pygame.image.load(os.path.join(bkgPath, 'world2.png')),
+    'cave' : pygame.image.load(os.path.join(bkgPath, 'cave.png')),
+}
 
 bkImage = pygame.image.load(backgroundPath)
 
@@ -34,6 +40,11 @@ marioPaths = {
     'win':      {
                 'RIGHT': pygame.image.load(os.path.join(marioCharacterPath, 'marioWin.png')),
                 'LEFT': pygame.image.load(os.path.join(marioCharacterPath, 'marioWin.png'))
+                },
+    'fail':
+                {
+                'RIGHT': pygame.image.load(os.path.join(marioCharacterPath, 'marioFail.png')),
+                'LEFT': pygame.image.load(os.path.join(marioCharacterPath, 'marioFail.png')) 
                 }
 }
 
@@ -99,11 +110,13 @@ Goomba = enemyCharacter(goombaPaths)
 
 musicPath = r'C:\Come On Python Games\resources\marioHangman\music'
 
-music = [
-    os.path.join(musicPath, 'fortress.ogg'),
-    os.path.join(musicPath, 'over1.ogg'),
-    os.path.join(musicPath, 'over2.ogg'),
-    os.path.join(musicPath, 'under')
-]
+music = {
+    'world1' : os.path.join(musicPath, 'over1.ogg'),
+    'world2' : os.path.join(musicPath, 'over2.ogg'),
+    'cave' : os.path.join(musicPath, 'under.ogg')
+}
+
+fort = os.path.join(musicPath, 'fortress.ogg')
+
 loseSound = os.path.join(musicPath, 'fail.ogg')
 winSound = os.path.join(musicPath, 'success.ogg')
