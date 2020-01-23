@@ -12,6 +12,7 @@ backgrounds = {
 }
 
 bkImage = pygame.image.load(backgroundPath)
+menuBKG = pygame.image.load(os.path.join(bkgPath, 'menuBkg.png'))
 
 boxPath = r'C:\Come On Python Games\resources\marioHangman\background\box.png'
 
@@ -25,8 +26,16 @@ for letter in range(len(alphaBoxImgs)):
     keyLetter = ascii_lowercase[letter]
     valueImage = alphaBoxImgs[letter]
     alphaBoxDict[keyLetter] = valueImage
+blankBox = pygame.image.load(os.path.join(alphaboxPath, 'blank.png'))
+usedBox = pygame.image.load(os.path.join(alphaboxPath, 'used.png'))
 
-blankBox = pygame.image.load(os.path.join(alphaboxPath, 'blank.PNG'))
+numBoxImgs = [pygame.image.load(os.path.join(alphaboxPath, f'{str(number)}.PNG')) for number in range(1, 9)]
+
+numBoxDict = {}
+for number in range(len(numBoxImgs)):
+    keyLetter = str(number+1)
+    valueImage = numBoxImgs[number]
+    numBoxDict[keyLetter] = valueImage
 
 LEFT = 'LEFT'
 RIGHT = 'RIGHT'

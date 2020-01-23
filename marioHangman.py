@@ -6,14 +6,6 @@ from string import ascii_lowercase
 # wordsToPlayWith = ['horse', 'tractor', 'goat', 'chicken', 'tuesday' ]
 alphabet = [letter for letter in ascii_lowercase]
 
-
-def printWord(word):
-
-    outWord = ' '.join(word)
-    print('-' * len(outWord))
-    print(outWord)
-    print('-' * len(outWord) + '\n')
-
 def produceProgessWord(wordToGuess):
     progress = []
     for letter in wordToGuess:
@@ -41,34 +33,19 @@ def checkAndReveal(guess, progressWord, wordToGuess):
 def calculateScore(previousGuesses, progressWord):
     return len([letter for letter in previousGuesses if letter not in progressWord])
 
-def getGuess(previousGuesses):
-    
-    validGuess = False
-    while not validGuess:
-        print(f'Previous guesses are: {previousGuesses}')
-        print('Guess a letter!')
-        inputLetter = input(': ').upper()
-        if inputLetter not in previousGuesses:
-            return inputLetter           
-        else:
-            print('You already entered that letter. Try again!')
-        
-
-
 def excelGetGameScheme(book, units):
     
     excelPath = r'C:\Come On Python Games\resources\marioHangman\quiz\marioQuiz.xlsx'
-   
+    
     wb = openpyxl.load_workbook(excelPath)
     
     wordsLoadedFromExcel = []
-    unitInts = [int(unit[1:]) for unit in units]
     
     sheet = wb[book]
-    row = 2
-
-    for unit in unitInts:
     
+
+    for unit in units:
+        row = 2
         endOfWords = False
         while not endOfWords:
             cellContents = sheet.cell(row=row, column=unit).value
@@ -77,38 +54,31 @@ def excelGetGameScheme(book, units):
             else:
                 wordsLoadedFromExcel.append(cellContents.lower())
                 row += 1
+    random.shuffle(wordsLoadedFromExcel)
     return wordsLoadedFromExcel
 
+
+def getBooks():
+    excelPath = r'C:\Come On Python Games\resources\marioHangman\quiz\marioQuiz.xlsx'
     
+    wb = openpyxl.load_workbook(excelPath)
+    
+    sheets = wb.sheetnames
+    print(sheets)
+    return sheets
+
 difficulty = 12
 
-def hangmanGame(howManyChances):
+     
 
-    wordToGuess = random.choice(wordsToPlayWith).upper()
-    progressWord = produceProgessWord(wordToGuess)
-    guessedLetters = []
-    currentGuess = None
-    playing = True
-
-    while playing:
-        playing, progressWord = checkAndReveal(currentGuess, progressWord, wordToGuess)
-        if playing:
-            currentGuess = getGuess(guessedLetters)
-            guessedLetters.append(currentGuess)
-    
-    print('You guessed the word!')
-        
-
-book = 'EB2'
-unit = ['U1', 'U2', 'U3']
+# book = 'NP'
+# unit = ['U3']
+# unit = ['U1', 'U2', 'U3', 'U4']
 
 # TODO
 # There should be a menu for books,
 # And a menu for units, where you can select multiple units.
 # It will need a submit button
-
-
-wordsToPlayWith = excelGetGameScheme(book, unit)
 
 
 FPS = 30
@@ -121,6 +91,12 @@ WHITE           =(255, 255, 255)
 
 BKGCOLOR = WHITE
 MAINTEXTCOLOR = BLACK
+
+def marioFont(size=35):
+    pygame.font.init()
+    return pygame.font.SysFont('minecraft', size)
+
+menuFont = marioFont()
 
 def beginMusic(track):
     pygame.mixer.init()
@@ -135,6 +111,7 @@ def hangmanRound(initObjects, difficulty=12):
     FPSCLOCK = initObjects[1]
     DISPLAYSURF = initObjects[2]
     DISPLAYRECT = initObjects[3]
+    wordsToPlayWith = initObjects[4]
 
     sessionWord = random.choice(wordsToPlayWith)
     try:
@@ -194,7 +171,7 @@ def hangmanRound(initObjects, difficulty=12):
         qBox = marioAssets.boxImg
         qBoxRect = qBox.get_rect()
         qBoxRect.centery = WINDOWHEIGHT/4
-        startingX = 200
+        startingX = 100
         boxSpacing = 56
         charCount = 0
 
@@ -227,9 +204,10 @@ def hangmanRound(initObjects, difficulty=12):
                 alphaBoxRect.centery = alphaMenuTopY
             alphaBoxRect.centerx = alphaMenuXIndent + (boxSpacing * boxXCount)
             if letter in guessedLetters:
-                continue
-            else:
-                DISPLAYSURF.blit(alphaBoxSurf, alphaBoxRect)
+                alphaBoxSurf = marioAssets.usedBox
+
+            
+            DISPLAYSURF.blit(alphaBoxSurf, alphaBoxRect)
 
         # Drawing Mario
         marioX = 72
@@ -286,7 +264,155 @@ def hangmanRound(initObjects, difficulty=12):
         screen.blit(DISPLAYSURF, DISPLAYRECT)
         pygame.display.flip()
         FPSCLOCK.tick(FPS)
+
+def getHowManyUnits(book):
+
+    excelPath = r'C:\Come On Python Games\resources\marioHangman\quiz\marioQuiz.xlsx'
+    
+    wb = openpyxl.load_workbook(excelPath)
+    
+    wordsLoadedFromExcel = []
+    
+    sheet = wb[book]
+    
+    endOfWords = False
+
+    unit = 1
+    unitColumns = []
+    while not endOfWords:
+
+        cellContents = sheet.cell(row=1, column=unit).value
+        if not cellContents:
+            endOfWords = True
+        else:
+            unitColumns.append(cellContents)
+            unit += 1
+
+    return unitColumns
+
+
+def startMenu(initObjects):
+    screen = initObjects[0]
+    FPSCLOCK = initObjects[1]
+    DISPLAYSURF = initObjects[2]
+    DISPLAYRECT = initObjects[3]
+
+    booksheets = getBooks()
+    bookIndex = 0
+    
+    menuType = 'book'
+
+    numberKey = None
+
+    chosenUnits = []
+    chosenBook = None
+
+    while True:
+        checkForQuit()
+
         
+        #Event-related variables:
+        newW, newH = None, None
+        submitLetter = False
+        
+
+        #Event-reading loop:
+        for event in pygame.event.get():
+            if event.type == VIDEORESIZE:
+                newW, newH = event.size
+            elif event.type == KEYUP:
+                if event.key == K_ESCAPE:
+                    terminate()
+                elif event.key in (K_RETURN, K_KP_ENTER):
+                    submitLetter = True
+                elif event.key == K_UP:
+                    bookIndex -= 1
+                elif event.key == K_DOWN:
+                    bookIndex += 1
+                else:
+                    numberKey = event.key
+            
+        
+        if bookIndex > len(booksheets)-1:
+            bookIndex = 0
+        elif bookIndex < 0:
+            bookIndex = len(booksheets)-1
+
+        screen.fill(BLACK)
+        DISPLAYSURF.blit(marioAssets.menuBKG, (0, 0))
+        
+        if newW and newH:
+            screen = pygame.display.set_mode((newW, newH ), pygame.RESIZABLE, display=0)
+            DISPLAYRECT.center = (newW/2, newH/2)
+        if menuType == 'book':
+            bookSelection = booksheets[bookIndex]
+            menuLabel = menuFont.render(f'- {bookSelection} -', 1, BLACK)
+            menuRect = menuLabel.get_rect()
+
+            menuRect.center = ((WINDOWWIDTH/2, 450))
+
+            DISPLAYSURF.blit(menuLabel, menuRect)
+
+        if menuType == 'unit':
+            getUnits = False
+            presentUnits = 8
+            if getUnits == False:
+                presentUnits = len(getHowManyUnits(bookSelection))
+                getUnits = True
+            
+
+            boxSpacing = 56
+            numMenuTopY = 500
+            numMenuBottomY = numMenuTopY + boxSpacing
+            numMenuXIndent = WINDOWWIDTH/2 - (boxSpacing * (presentUnits/2+1))
+
+            for unit in range(1, presentUnits+1):
+                boxXCount = unit+1
+                numBoxSurf = marioAssets.numBoxDict[str(unit)]
+                numBoxRect = numBoxSurf.get_rect()
+                if unit > 12:
+                    boxXCount -= 13
+                    numBoxRect.centery = numMenuBottomY
+                else:
+                    numBoxRect.centery = numMenuTopY
+                numBoxRect.centerx = numMenuXIndent + (boxSpacing * boxXCount)
+                if unit in chosenUnits:
+                    numBoxSurf = marioAssets.usedBox
+
+            
+                DISPLAYSURF.blit(numBoxSurf, numBoxRect)
+
+                if numberKey:
+                    unitNumber = numberKey -48
+
+                    if unitNumber not in chosenUnits:
+                        chosenUnits.append(unitNumber)
+                    else:
+                        chosenUnits.remove(unitNumber)
+
+                    numberKey = None
+
+
+        if submitLetter and menuType == 'book':
+            chosenBook = bookSelection
+            menuType = 'unit'
+
+        elif submitLetter and menuType == 'unit':
+            if len(chosenUnits) >= 1:
+                print(f'Playing with words from book {chosenBook}, unit(s) {chosenUnits}')
+                return chosenBook, chosenUnits
+        
+    
+            
+
+
+        screen.blit(DISPLAYSURF, DISPLAYRECT)
+        pygame.display.flip()
+        FPSCLOCK.tick(FPS)
+
+
+
+
 def winScreen(initObjects, word, background):
     screen = initObjects[0]
     FPSCLOCK = initObjects[1]
@@ -340,7 +466,7 @@ def winScreen(initObjects, word, background):
         qBox = marioAssets.boxImg
         qBoxRect = qBox.get_rect()
         qBoxRect.centery = WINDOWHEIGHT/4
-        startingX = 200
+        startingX = 100
         boxSpacing = 56
         charCount = 0
 
@@ -426,7 +552,7 @@ def loseScreen(initObjects, word, progress, background):
         qBox = marioAssets.boxImg
         qBoxRect = qBox.get_rect()
         qBoxRect.centery = WINDOWHEIGHT/4
-        startingX = 200
+        startingX = 100
         boxSpacing = 56
         charCount = 0
 
@@ -480,6 +606,13 @@ def main():
     DISPLAYRECT.center = (BKGWIDTH/2, BKGHEIGHT/2)
     
     initObjects = [screen, FPSCLOCK, DISPLAYSURF, DISPLAYRECT]
+
+    book, units = startMenu(initObjects)
+    wordsToPlayWith = excelGetGameScheme(book, units)
+    random.shuffle(wordsToPlayWith)
+
+    initObjects.append(wordsToPlayWith)
+
     while True:
         roundResult, word, progress, bkg = hangmanRound(initObjects)
         if roundResult == 'WIN':
@@ -495,5 +628,5 @@ def main():
 
 
 
-
+   
 main()
